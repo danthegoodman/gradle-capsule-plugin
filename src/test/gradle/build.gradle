@@ -1,0 +1,99 @@
+import java.util.jar.Manifest as JarManifest
+
+buildscript {
+  dependencies {
+    classpath fileTree('../../../build/libs')
+  }
+}
+
+apply plugin: 'java'
+apply plugin: 'us.kirchmeier.capsule'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile('org.apache.ant:ant:1.9.3') {
+        exclude module: 'ant-launcher'
+  }
+  runtime 'junit:junit:4.11'
+}
+
+jar {
+  baseName 'test-project'
+}
+
+task fatCapsule(type: FatCapsule) {
+  applicationClass 'com.foo.Main'
+  classifier 'fat'
+}
+
+task thinCapsule(type: ThinCapsule) {
+  applicationClass 'com.foo.Main'
+  classifier 'thin'
+}
+
+task 'test-fatCapsule'(dependsOn: 'fatCapsule') << {
+  def t = tasks.getByName('fatCapsule')
+  def tree = zipTree(t.outputs.files.singleFile)
+
+  def paths = []
+  tree.visit { paths << it.path.toString() }
+  paths.sort()
+  assert paths == [
+      'Capsule.class',
+      'META-INF',
+      'META-INF/MANIFEST.MF',
+      'ant-1.9.3.jar',
+      'hamcrest-core-1.3.jar',
+      'junit-4.11.jar',
+      'test-project.jar',
+  ]
+
+  def manifest = tree.matching({ include 'META-INF/MANIFEST.MF' }).singleFile
+  manifest.withInputStream { is ->
+    def jm = new JarManifest(is).mainAttributes
+    assert jm.size() == 3
+    assert jm.getValue('Manifest-Version') != null
+    assert jm.getValue('Main-Class') == 'Capsule'
+    assert jm.getValue('Application-Class') == 'com.foo.Main'
+  }
+}
+
+task 'test-thinCapsule'(dependsOn: 'thinCapsule') << {
+  def t = tasks.getByName('thinCapsule')
+  def tree = zipTree(t.outputs.files.singleFile)
+
+  def paths = []
+  tree.matching({ exclude 'capsule/' }) visit { paths << it.path.toString() }
+  paths.sort()
+  assert paths == [
+      'Capsule.class',
+      'META-INF',
+      'META-INF/MANIFEST.MF',
+      'com',
+      'com/foo',
+      'com/foo/HelloWorld.class',
+      'com/foo/Main.class',
+  ]
+
+  def capsuleClases = tree.matching({ include 'capsule/' }).files.size()
+  assert capsuleClases > 1000
+
+  def manifest = tree.matching({ include 'META-INF/MANIFEST.MF' }).singleFile
+  manifest.withInputStream { is ->
+    def jm = new JarManifest(is).mainAttributes
+    assert jm.size() == 5
+    assert jm.getValue('Manifest-Version') != null
+    assert jm.getValue('Main-Class') == 'Capsule'
+    assert jm.getValue('Application-Class') == 'com.foo.Main'
+    assert jm.getValue('Dependencies') == 'junit:junit:4.11 org.apache.ant:ant:1.9.3(*:ant-launcher)'
+    assert jm.getValue('Extract-Capsule') == 'false'
+  }
+}
+
+task 'self-test'(dependsOn: [
+    'test-fatCapsule',
+    'test-thinCapsule',
+])
