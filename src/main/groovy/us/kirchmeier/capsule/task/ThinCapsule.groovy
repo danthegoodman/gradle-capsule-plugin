@@ -5,7 +5,6 @@ class ThinCapsule extends Capsule {
     applicationSource = project.sourceSets.main.output
     capsuleManifest {
       dependencyConfiguration = project.configurations.runtime
-      extractCapsule = false
     }
   }
 }

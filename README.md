@@ -88,9 +88,6 @@ task thinCapsuleDefaults(type:ThinCapsule){
   capsuleManifest {
     // Add all runtime dependencies as downloadable dependencies
     dependencyConfiguration = configurations.runtime
-
-    // No jars are embedded, so no need for extraction
-    extractCapsule = false
   }
 }
 ```

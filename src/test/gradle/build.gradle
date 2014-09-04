@@ -84,12 +84,11 @@ task 'test-thinCapsule'(dependsOn: 'thinCapsule') << {
   def manifest = tree.matching({ include 'META-INF/MANIFEST.MF' }).singleFile
   manifest.withInputStream { is ->
     def jm = new JarManifest(is).mainAttributes
-    assert jm.size() == 5
+    assert jm.size() == 4
     assert jm.getValue('Manifest-Version') != null
     assert jm.getValue('Main-Class') == 'Capsule'
     assert jm.getValue('Application-Class') == 'com.foo.Main'
     assert jm.getValue('Dependencies') == 'junit:junit:4.11 org.apache.ant:ant:1.9.3(*:ant-launcher)'
-    assert jm.getValue('Extract-Capsule') == 'false'
   }
 }
 
