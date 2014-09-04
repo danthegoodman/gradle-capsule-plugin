@@ -85,7 +85,7 @@ task testIntegration(dependsOn:'jar', group: 'Verification', description: 'Runs 
   println("--------------------------------------------------------------------------------")
   def baseDir = "${projectDir}/src/test/gradle"
 
-  def proc = ["${baseDir}/gradlew", "self-test"].execute(null, file(baseDir))
+  def proc = ["${baseDir}/gradlew", "clean", "self-test"].execute(null, file(baseDir))
   proc.consumeProcessOutput(System.out, System.err)
   int exitCode = proc.waitFor()
   println("--------------------------------------------------------------------------------")
