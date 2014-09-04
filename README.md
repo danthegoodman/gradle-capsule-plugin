@@ -1,7 +1,7 @@
 # gradle-capsule-plugin
 
 [![Version](http://img.shields.io/badge/Version-0.7.1-green.svg?style=flat-square)](https://github.com/danthegoodman/gradle-capsule-plugin/releases)
-[![Capsule Version](http://img.shields.io/badge/Capsule%20Version-0.7.1-blue.svg?style=flat-square)](https://github.com/puniverse/capsule/releases)
+[![Capsule Version](http://img.shields.io/badge/Capsule%20Version-0.8.0-blue.svg?style=flat-square)](https://github.com/puniverse/capsule/releases)
 
 A Gradle plugin for [Capsule], the packaging and deployment tool for JVM apps.
 
