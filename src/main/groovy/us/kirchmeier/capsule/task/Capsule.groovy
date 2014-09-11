@@ -4,6 +4,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.util.ConfigureUtil
 import us.kirchmeier.capsule.manifest.CapsuleManifest
+import us.kirchmeier.capsule.spec.ReallyExecutableSpec
 
 class Capsule extends Jar {
   /**
@@ -37,12 +38,17 @@ class Capsule extends Jar {
 
   CapsuleManifest capsuleManifest = new CapsuleManifest()
 
+  protected ReallyExecutableSpec _reallyExecutable = null
+
   Capsule() {
     capsuleConfiguration = project.configurations.capsule
     classifier = 'capsule'
 
     project.gradle.afterProject {
       finalizeSettings()
+      if(_reallyExecutable != null){
+        doLast { makeReallyExecutable() }
+      }
     }
   }
 
@@ -69,6 +75,22 @@ class Capsule extends Jar {
     return this;
   }
 
+  public ReallyExecutableSpec getReallyExecutable(){
+    if(_reallyExecutable == null){
+      _reallyExecutable = new ReallyExecutableSpec();
+    }
+    return _reallyExecutable;
+  }
+
+  public void setReallyExecutable(ReallyExecutableSpec spec) {
+    _reallyExecutable = spec
+  }
+
+  public Capsule reallyExecutable(@DelegatesTo(ReallyExecutableSpec) Closure configureClosure) {
+     ConfigureUtil.configure(configureClosure, getReallyExecutable());
+     return this;
+  }
+
   protected void finalizeSettings() {
     applyDefaultCapsuleSet()
     applyApplicationSource()
@@ -93,5 +115,17 @@ class Capsule extends Jar {
     if (!embedConfiguration) return
 
     from { embedConfiguration }
+  }
+
+  protected void makeReallyExecutable() {
+    def f = File.createTempFile("cap", null)
+    ant.concat(destfile: f, binary: true) {
+      _reallyExecutable.buildAntResource(project, ant)
+      fileset(dir: destinationDir) {
+        include(name: archiveName)
+      }
+    }
+    ant.chmod(file: f, perm: 'ug+x', osfamily: 'unix')
+    f.renameTo(outputs.files.singleFile)
   }
 }

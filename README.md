@@ -154,6 +154,36 @@ task myCapsule(type:ThinCapsule){
 }
 ```
 
+## "Really Executable" Capsules
+
+`reallyExecutable` will make a capsule executable as a script in unix environments.
+You may read more in the [capsule documentation][reallyexec].
+
+`reallyExecutable.regular()` is the default and uses a plan execution script.
+`reallyExecutable.trampoline()` will use the trompoline script.
+`reallyExecutable.script(file)` may be set to define your own script.
+
+[reallyexec]:https://github.com/puniverse/capsule#really-executable-capsules
+
+```groovy
+task executableCapsule(type:FatCapsule){
+  applicationClass 'com.foo.CoolCalculator'
+  reallyExecutable //implies regular()
+}
+
+task trampolineCapsule(type:ThinCapsule){
+  applicationClass 'com.foo.CoolCalculator'
+  reallyExecutable { trampoline() }
+}
+
+task myExecutableCapsule(type:FatCapsule){
+  applicationClass 'com.foo.CoolCalculator'
+  reallyExecutable {
+    script file('my_script.sh')
+  }
+}
+```
+
 ## Changing the capsule implementation
 
 For advanced usage, `capsuleConfiguration` and `capsuleFilter` control where the capsule implementation comes from.

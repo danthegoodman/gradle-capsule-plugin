@@ -1,4 +1,4 @@
-import java.util.jar.Manifest as JarManifest
+import java.util.jar.JarFile
 
 buildscript {
   dependencies {
@@ -9,13 +9,16 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'us.kirchmeier.capsule'
 
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
 repositories {
   mavenCentral()
 }
 
 dependencies {
   compile('org.apache.ant:ant:1.9.3') {
-        exclude module: 'ant-launcher'
+    exclude module: 'ant-launcher'
   }
   runtime 'junit:junit:4.11'
 }
@@ -24,66 +27,108 @@ jar {
   baseName 'test-project'
 }
 
+ext.selfTest = task('self-test')
+
 task fatCapsule(type: FatCapsule) {
   applicationClass 'com.foo.Main'
   classifier 'fat'
+  buildTests(delegate, executable: false, fat: true)
+}
+
+task fatCapsuleExecutable(type: FatCapsule) {
+  applicationClass 'com.foo.Main'
+  classifier 'fatExec'
+  reallyExecutable
+  buildTests(delegate, executable: true, fat: true)
 }
 
 task thinCapsule(type: ThinCapsule) {
   applicationClass 'com.foo.Main'
   classifier 'thin'
+  buildTests(delegate, executable: false, thin: true)
+}
+task thinCapsuleExecutable(type: ThinCapsule) {
+  applicationClass 'com.foo.Main'
+  classifier 'thinExec'
+  reallyExecutable { trampoline() }
+  buildTests(delegate, executable: true, thin: true)
 }
 
-task 'test-fatCapsule'(dependsOn: 'fatCapsule') << {
-  def t = tasks.getByName('fatCapsule')
-  def tree = zipTree(t.outputs.files.singleFile)
+private void buildTests(Map options, Task t) {
+  def name = t.name
+  def f = t.outputs.files.singleFile
 
-  def paths = []
-  tree.visit { paths << it.path.toString() }
-  paths.sort()
-  assert paths == [
-      'Capsule.class',
-      'META-INF',
-      'META-INF/MANIFEST.MF',
-      'ant-1.9.3.jar',
-      'hamcrest-core-1.3.jar',
-      'junit-4.11.jar',
-      'test-project.jar',
-  ]
+  project.task("test-output-$name", dependsOn: [t]) << {
+    testOutput(f, options)
+  }
+  project.task("test-contents-$name", dependsOn: [t]) << {
+    testContents(f, options)
+  }
+  selfTest.dependsOn.addAll([
+      "test-output-$name",
+      "test-contents-$name"
+  ])
+}
 
-  def manifest = tree.matching({ include 'META-INF/MANIFEST.MF' }).singleFile
-  manifest.withInputStream { is ->
-    def jm = new JarManifest(is).mainAttributes
+private void testOutput(f, options) {
+  def cmd = options.executable ? [f.absolutePath] : ['java', '-jar', f.absolutePath]
+  def proc = cmd.execute(null, null)
+  def out = new ByteArrayOutputStream()
+  proc.consumeProcessOutput(out, System.err)
+  int exitCode = proc.waitFor()
+  def strOut = new String(out.toByteArray());
+  assert strOut == 'Hello World\n'
+  assert exitCode == 0
+}
+
+private void testContents(file, options) {
+  def f = new JarFile(file, false)
+  def capsuleClasses = 0
+  def projectFiles = []
+  f.entries().each {
+    if (it.name.startsWith('capsule/')) {
+      capsuleClasses += 1
+    } else {
+      projectFiles << it.name
+    }
+  }
+
+  projectFiles.sort()
+  if (options.fat) {
+    assert projectFiles == [
+        'Capsule.class',
+        'META-INF/',
+        'META-INF/MANIFEST.MF',
+        'ant-1.9.3.jar',
+        'hamcrest-core-1.3.jar',
+        'junit-4.11.jar',
+        'test-project.jar',
+    ]
+  } else if (options.thin) {
+    assert projectFiles == [
+        'Capsule.class',
+        'META-INF/',
+        'META-INF/MANIFEST.MF',
+        'com/',
+        'com/foo/',
+        'com/foo/HelloWorld.class',
+        'com/foo/Main.class',
+    ]
+  }
+
+  if (options.fat) {
+    assert capsuleClasses == 0
+  } else if (options.thin) {
+    assert capsuleClasses > 1000
+  }
+
+  def jm = f.manifest.mainAttributes
+  if (options.fat) {
     assert jm.size() == 3
     assert jm.getValue('Manifest-Version') != null
     assert jm.getValue('Main-Class') == 'Capsule'
     assert jm.getValue('Application-Class') == 'com.foo.Main'
-  }
-}
-
-task 'test-thinCapsule'(dependsOn: 'thinCapsule') << {
-  def t = tasks.getByName('thinCapsule')
-  def tree = zipTree(t.outputs.files.singleFile)
-
-  def paths = []
-  tree.matching({ exclude 'capsule/' }) visit { paths << it.path.toString() }
-  paths.sort()
-  assert paths == [
-      'Capsule.class',
-      'META-INF',
-      'META-INF/MANIFEST.MF',
-      'com',
-      'com/foo',
-      'com/foo/HelloWorld.class',
-      'com/foo/Main.class',
-  ]
-
-  def capsuleClases = tree.matching({ include 'capsule/' }).files.size()
-  assert capsuleClases > 1000
-
-  def manifest = tree.matching({ include 'META-INF/MANIFEST.MF' }).singleFile
-  manifest.withInputStream { is ->
-    def jm = new JarManifest(is).mainAttributes
+  } else if (options.thin) {
     assert jm.size() == 4
     assert jm.getValue('Manifest-Version') != null
     assert jm.getValue('Main-Class') == 'Capsule'
@@ -91,8 +136,3 @@ task 'test-thinCapsule'(dependsOn: 'thinCapsule') << {
     assert jm.getValue('Dependencies') == 'junit:junit:4.11 org.apache.ant:ant:1.9.3(*:ant-launcher)'
   }
 }
-
-task 'self-test'(dependsOn: [
-    'test-fatCapsule',
-    'test-thinCapsule',
-])
