@@ -13,6 +13,16 @@ This readme assumes some familiarity with the [Capsule] project.
 
 # Adding the Plugin
 
+### In Gradle 2.1 and later
+
+```groovy
+plugins {
+  id "us.kirchmeier.capsule" version "0.8.0"
+}
+```
+
+### In earlier versions
+
 ```groovy
 buildscript {
     repositories {
