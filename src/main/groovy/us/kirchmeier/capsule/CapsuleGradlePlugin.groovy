@@ -18,7 +18,7 @@ class CapsuleGradlePlugin implements Plugin<Project> {
 
       configurations.create('capsule')
       dependencies {
-        capsule 'co.paralleluniverse:capsule:0.8.0'
+        capsule 'co.paralleluniverse:capsule:0.9.0'
       }
     }
   }
