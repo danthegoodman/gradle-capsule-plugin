@@ -44,7 +44,7 @@ class Capsule extends Jar {
     capsuleConfiguration = project.configurations.capsule
     classifier = 'capsule'
 
-    project.gradle.afterProject {
+    project.afterEvaluate {
       finalizeSettings()
       if(_reallyExecutable != null){
         doLast { makeReallyExecutable() }
