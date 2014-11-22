@@ -14,7 +14,7 @@ This readme assumes some familiarity with the [Capsule] project.
 
 ```groovy
 plugins {
-  id "us.kirchmeier.capsule" version "0.9.0"
+  id "us.kirchmeier.capsule" version "0.10.0"
 }
 ```
 
@@ -26,7 +26,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'us.kirchmeier:gradle-capsule-plugin:0.9.0'
+        classpath 'us.kirchmeier:gradle-capsule-plugin:0.10.0'
     }
 }
 
