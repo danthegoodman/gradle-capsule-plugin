@@ -75,6 +75,16 @@ class Capsule extends Jar {
     return this;
   }
 
+  public Capsule capsuleConfiguration(Configuration capsuleConfiguration) {
+    this.capsuleConfiguration = capsuleConfiguration
+    return this
+  }
+
+  public Capsule embedConfiguration(Configuration embedConfiguration){
+    this.embedConfiguration = embedConfiguration
+    return this
+  }
+
   public ReallyExecutableSpec getReallyExecutable(){
     if(_reallyExecutable == null){
       _reallyExecutable = new ReallyExecutableSpec();
