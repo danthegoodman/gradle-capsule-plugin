@@ -86,6 +86,9 @@ class CapsuleManifest {
   @ManifestSetting('Java-Agents')
   public List<String> javaAgents = []
 
+  @ManifestSetting('Native-Agents')
+  public List<String> nativeAgents = []
+
   @ManifestSetting('Repositories')
   public List<String> repositories = []
 
@@ -103,6 +106,12 @@ class CapsuleManifest {
 
   @ManifestSetting('Native-Dependencies-Mac')
   public List<String> nativeDependenciesMac
+
+  @ManifestSetting('CapsuleLogLevel')
+  public String capsuleLogLevel
+
+  @ManifestSetting('Caplets')
+  public List<String> caplets = []
 
   /**
    * The configuration describing the dependencies to list in the manifest.
