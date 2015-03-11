@@ -25,6 +25,17 @@ class Capsule extends Jar {
   Closure capsuleFilter
 
   /**
+   * The caplet configuration describing any caplet classes.
+   * <p>
+   * Defaults to <code>configurations.caplet</code>. All files not named 'Capsule.class'
+   * will be extracted into the capsule.
+   * </p><p>
+   * If null, you are responsible for including the necessary caplet classes.
+   * </p>
+   */
+  Configuration capletConfiguration
+
+  /**
    * The main object to include, representative of the primary application.
    * <p>This object is passed directly to {@link #from(java.lang.Object...)}.</p>
    */
@@ -42,6 +53,7 @@ class Capsule extends Jar {
 
   Capsule() {
     capsuleConfiguration = project.configurations.capsule
+    capletConfiguration = project.configurations.caplet
     classifier = 'capsule'
 
     project.afterEvaluate {
@@ -80,6 +92,11 @@ class Capsule extends Jar {
     return this
   }
 
+  public Capsule capletConfiguration(Configuration capletConfiguration) {
+    this.capletConfiguration = capletConfiguration
+    return this
+  }
+
   public Capsule embedConfiguration(Configuration embedConfiguration){
     this.embedConfiguration = embedConfiguration
     return this
@@ -103,10 +120,18 @@ class Capsule extends Jar {
 
   protected void finalizeSettings() {
     applyDefaultCapsuleSet()
+    applyDefaultCapletSet()
     applyApplicationSource()
     applyEmbedConfiguration()
 
-    manifest.attributes(capsuleManifest.buildManifestAttributes())
+    def attrs = capsuleManifest.buildAllManifestAttributes();
+    attrs.each { k, v ->
+      if(k){
+        manifest.attributes(v, k)
+      } else {
+        manifest.attributes(v)
+      }
+    }
   }
 
   protected void applyApplicationSource() {
@@ -119,6 +144,12 @@ class Capsule extends Jar {
     if (!capsuleConfiguration) return
 
     from(capsuleConfiguration.collect({ project.zipTree(it) }), capsuleFilter)
+  }
+
+  protected void applyDefaultCapletSet() {
+    if (!capletConfiguration) return
+
+    from(capletConfiguration.collect({ project.zipTree(it) }), { exclude 'Capsule.class'} )
   }
 
   protected void applyEmbedConfiguration() {

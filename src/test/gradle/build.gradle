@@ -1,3 +1,4 @@
+import java.nio.file.Files
 import java.util.jar.JarFile
 
 buildscript {
@@ -34,7 +35,6 @@ task fatCapsule(type: FatCapsule) {
   classifier 'fat'
   buildTests(delegate, executable: false, fat: true)
 }
-
 task fatCapsuleExecutable(type: FatCapsule) {
   applicationClass 'com.foo.Main'
   classifier 'fatExec'
@@ -42,26 +42,49 @@ task fatCapsuleExecutable(type: FatCapsule) {
   buildTests(delegate, executable: true, fat: true)
 }
 
-task thinCapsule(type: ThinCapsule) {
+task mavenCapsule(type: MavenCapsule) {
   applicationClass 'com.foo.Main'
-  classifier 'thin'
-  buildTests(delegate, executable: false, thin: true)
+  classifier 'maven'
+  buildTests(delegate, executable: false, maven: true)
 }
-task thinCapsuleExecutable(type: ThinCapsule) {
+task mavenCapsuleExecutable(type: MavenCapsule) {
   applicationClass 'com.foo.Main'
-  classifier 'thinExec'
+  classifier 'mavenExec'
   reallyExecutable { trampoline() }
-  buildTests(delegate, executable: true, thin: true)
+  buildTests(delegate, executable: true, maven: true)
 }
 
-private void buildTests(Map options, Task t) {
-  def name = t.name
-  def f = t.outputs.files.singleFile
+task platformCapsule(type: FatCapsule) {
+  capsuleManifest {
+    platform('macos') { applicationClass 'com.foo.Main' }
+    platform('windows') { applicationClass 'com.foo.Main' }
+    platform('linux') { applicationClass 'com.foo.Main' }
+  }
+  classifier 'platform'
+  buildTests(delegate, executable: false, fat: true)
+}
 
-  project.task("test-output-$name", dependsOn: [t]) << {
+task recreatedMavenCapsule(type: Capsule){
+  applicationClass 'com.foo.Main'
+  classifier 'recreated'
+  applicationSource jar
+  capletConfiguration configurations.mavenCaplet
+  capsuleManifest{
+    dependencyConfiguration configurations.runtime
+    caplets << 'MavenCapsule'
+  }
+  buildTests(delegate, executable: false, maven: true)
+}
+
+private void buildTests(Map options, task) {
+  def name = task.name
+  def f = task.outputs.files.singleFile
+  task.capsuleManifest.applicationId = "com.foo.${name}".toString()
+
+  project.task("test-output-$name", dependsOn: [task]) << {
     testOutput(f, options)
   }
-  project.task("test-contents-$name", dependsOn: [t]) << {
+  project.task("test-contents-$name", dependsOn: [task]) << {
     testContents(f, options)
   }
   selfTest.dependsOn.addAll([
@@ -71,8 +94,10 @@ private void buildTests(Map options, Task t) {
 }
 
 private void testOutput(f, options) {
-  def cmd = options.executable ? [f.absolutePath] : ['java', '-jar', f.absolutePath]
-  def proc = cmd.execute(null, null)
+  def cmd = options.executable ? [f.absolutePath] : ['java', '-Dcapsule.log2=ALL', '-jar', f.absolutePath]
+  def env = System.getenv().collect{ k,v -> "$k=$v" }
+  env << "CAPSULE_CACHE_DIR=${Files.createTempDirectory("gradle_capsule_test")}";
+  def proc = cmd.execute(env, null)
   def out = new ByteArrayOutputStream()
   proc.consumeProcessOutput(out, System.err)
   int exitCode = proc.waitFor()
@@ -83,12 +108,9 @@ private void testOutput(f, options) {
 
 private void testContents(file, options) {
   def f = new JarFile(file, false)
-  def capsuleClasses = 0
-  def projectFiles = []
+  def projectFiles = new ArrayList<String>()
   f.entries().each {
-    if (it.name.startsWith('capsule/')) {
-      capsuleClasses += 1
-    } else {
+    if (!it.name.startsWith('capsule/')) {
       projectFiles << it.name
     }
   }
@@ -104,35 +126,27 @@ private void testContents(file, options) {
         'junit-4.11.jar',
         'test-project.jar',
     ]
-  } else if (options.thin) {
+  } else if (options.maven) {
     assert projectFiles == [
         'Capsule.class',
         'META-INF/',
         'META-INF/MANIFEST.MF',
-        'com/',
-        'com/foo/',
-        'com/foo/HelloWorld.class',
-        'com/foo/Main.class',
+        'MavenCapsule.class',
+        'test-project.jar',
     ]
   }
 
+  def jm = f.manifest.mainAttributes
+  assert jm.getValue('Application-Id') ==~ /com\.foo\.\w+/
+  assert jm.getValue('Manifest-Version') != null
+  assert jm.getValue('Main-Class') == 'Capsule'
+  assert jm.getValue('Application-Class') == 'com.foo.Main'
   if (options.fat) {
-    assert capsuleClasses == 0
-  } else if (options.thin) {
-    assert capsuleClasses > 1000
+    assert jm.size() == 4
+  } else if (options.maven) {
+    assert jm.getValue('Dependencies') == 'junit:junit:4.11 org.apache.ant:ant:1.9.3(*:ant-launcher)'
+    assert jm.getValue('Caplets') == 'MavenCapsule'
+    assert jm.size() == 6
   }
 
-  def jm = f.manifest.mainAttributes
-  if (options.fat) {
-    assert jm.size() == 3
-    assert jm.getValue('Manifest-Version') != null
-    assert jm.getValue('Main-Class') == 'Capsule'
-    assert jm.getValue('Application-Class') == 'com.foo.Main'
-  } else if (options.thin) {
-    assert jm.size() == 4
-    assert jm.getValue('Manifest-Version') != null
-    assert jm.getValue('Main-Class') == 'Capsule'
-    assert jm.getValue('Application-Class') == 'com.foo.Main'
-    assert jm.getValue('Dependencies') == 'junit:junit:4.11 org.apache.ant:ant:1.9.3(*:ant-launcher)'
-  }
 }

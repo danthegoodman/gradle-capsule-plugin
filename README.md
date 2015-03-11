@@ -2,215 +2,108 @@
 
 A Gradle plugin for [Capsule], the packaging and deployment tool for JVM apps.
 
-Capsule allows you to package your app and it's dependencies into a single jar for easy and efficient deployment.
+[Capsule]:https://github.com/puniverse/capsule/tree/v1.0-rc1
 
-This readme assumes some familiarity with the [Capsule] project.
-
-[Capsule]:https://github.com/puniverse/capsule
 
 # Adding the Plugin
 
-### In Gradle 2.1 and later
-
 ```groovy
 plugins {
-  id "us.kirchmeier.capsule" version "0.10.0"
+  id "us.kirchmeier.capsule" version "1.0-rc1"
 }
-```
-
-### In earlier versions
-
-```groovy
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'us.kirchmeier:gradle-capsule-plugin:0.10.0'
-    }
-}
-
-apply plugin: 'us.kirchmeier.capsule'
 ```
 
 
 # Quick Start
 
-A `FatCapsule` embeds your application and all dependencies into one jar.
+This plugin defines no tasks, but instead provides several task types for building your own tasks.
 
-A `ThinCapsule` contains your application and will download your dependencies on startup.
 
-The `Capsule` task type is the core capsule provider and comes with almost no defaults.
-You may use it to create an "empty capsule" that will download your entire application from a maven repository on startup.
+## FatCapsule
+
+The `FatCapsule` type embedds your application and all of its dependencies into one executable jar file:
 
 ```groovy
 task fatCapsule(type: FatCapsule) {
+  applicationClass 'com.foo.HelloWorld'
+}
+```
+
+Use it like so:
+
+``` text
+$ gradle fatCapsule
+
+$ cd build/libs
+$ ls
+project.jar project-capsule.jar
+
+$ java -jar project-capsule.jar
+Hello World!
+```
+
+Without further configuration:
+
+* It obtains your project source from the `jar` task. 
+* It will include all of the dependencies from the `runtime` dependency configuration.
+* It will have the `capsule` classifier in it's file name.
+
+
+## MavenCapsule
+
+The `MavenCapsule` type embeds only your application. It will download dependencies when the user executes the capulse.
+
+Under the hood, it uses the [maven capsule][mvn-cap], which caches dependencies after downloading them.
+
+[mvn-cap]: https://github.com/puniverse/capsule-maven/tree/v1.0-rc1
+
+```groovy
+task mavenCapsule(type: MavenCapsule){
   applicationClass 'com.foo.CoolCalculator'
 }
+```
 
-task thinCapsule(type: ThinCapsule) {
-  applicationClass 'com.foo.CoolCalculator'
-}
+Without further configuration:
 
-task emptyCapsule(type: Capsule) {
-  application 'com.foo:CoolCalculator:LATEST'
+* It obtains your project source from the `jar` task. 
+* It will download at runtime all of the dependencies from the `runtime` dependency configuration.
+* It will have the `capsule` classifier in it's file name.
+
+
+## Configuration
+
+Capsule allows you define attributes in your capsule to onfigure system properties, pass in arguments to your application, limit compatible JVM versions and more.
+You may configure these using the `capsuleManifest` block.
+
+See also: [Capsule: Manifest Attributes][manifest-cap] and [Source: `CapsuleManifest`][manifest-src]
+
+[manifest-cap]:https://github.com/puniverse/capsule/tree/v1.0-rc1#manifest-attributes 
+[manifest-src]:https://github.com/danthegoodman/gradle-capsule-plugin/blob/master/src/main/groovy/us/kirchmeier/capsule/manifest/CapsuleManifest.groovy
+
+```groovy
+task myCapsule(type:FatCapsule){
+  applicationClass 'com.foo.FancyCalculator'
+
+  capsuleManifest {
+    systemProperties['log4j.configuration'] = 'log4j.xml'
+    args = ['--very-fancy']
+    minJavaVersion = '1.8.0'
+  }
 }
 ```
 
 
 # Documentation
 
-The `Capsule` tasks are all extentions upon the `Jar` task, with some additional configuration options available.
+More thorough documentation is available in [`DOCUMENTATION.md`][docs].
 
-To build a capsule, one of the following properties must be defined:
+[docs]:https://github.com/danthegoodman/gradle-capsule-plugin/blob/master/DOCUMENTATION.md
 
-* `applicationClass` - The Main class
-* `application` - A maven dependency containing a main class
-* `capsuleManifest.unixScript` - A startup script for unix machines
-* `capsuleManifest.windowsScript` - A startup script for windows machines
 
-## Task Defaults
+# Support
 
-By default, all capsules have the 'capsule' classifier and use the main implementation of the capsule library.
+If you run into any issues or have an enhancement idea, please [file an issue](https://github.com/danthegoodman/gradle-capsule-plugin/issues).
 
-`FatCapsule` and `ThinCapsule` are task types which provide reasonable behavior with minimal configuration.
-Aside from these default values, there is no distinction between them and the base `Capsule` task type.
+If you have any questions, capsule or gradle related, please start a topic on the [Google Group/Mailing List][group].
 
-```groovy
-task fatCapsuleDefaults(type:FatCapsule){
-  // Include the application's jar in the capsule
-  applicationSource jar
-
-  // Embed all runtime dependencies
-  embedConfiguration = configurations.runtime
-
-  // Limit the capsule library, since the dependencies are embedded
-  capsuleFilter = { include 'Capsule.class' }
-}
-
-task thinCapsuleDefaults(type:ThinCapsule){
-  // Include the application source in the capsule
-  applicationSource sourceSets.main.outputs
-
-  capsuleManifest {
-    // Add all runtime dependencies as downloadable dependencies
-    dependencyConfiguration = configurations.runtime
-  }
-}
-```
-
-## Manifest Options
-
-`capsuleManifest` is a helper for defining the properties for configuring the capsule.
-It is an instance of the [`CapsuleManifest`][src] class.
-
-Please refer to the [source file][src] for a list of all possible properties.
-Refer to the [Capsule] documentation for documentation on the properties.
-
-[src]: https://github.com/danthegoodman/gradle-capsule-plugin/blob/master/src/main/groovy/us/kirchmeier/capsule/manifest/CapsuleManifest.groovy
-
-```groovy
-task myCapsule(type:ThinCapsule){
-  applicationClass 'com.foo.CoolCalculator'
-
-  capsuleManifest.systemProperties = ['java.awt.headless': true]
-  capsuleManifest {
-    repositories << 'jcenter'
-  }
-}
-```
-
-## Application Source
-
-`applicationSource` defines how the application is brought into the capsule.
-
-It is passed directly into a `from(...)` on the underlying implementation, so it may be a task, file, sourceset or more.
-
-```groovy
-task myCapsule(type:FatCapsule){
-  applicationClass 'com.foo.FancyCalculator'
-  applicationSource myFancyJar
-}
-```
-
-## Embedding Jars
-
-`embedConfiguration` defines which configuration contains the dependencies to embed.
-
-```groovy
-task myCapsule(type:FatCapsule){
-  applicationClass 'com.foo.FancyCalculator'
-  embedConfiguration configurations.runtime
-}
-```
-
-## Downloadable Dependencies
-
-`capsuleManifest.dependencyConfiguration` defines which configuration contains the dependencies to download on startup.
-
-`capsuleManifest.dependencies` is a list of strings which are also downloaded on startup.
-You may use this if you have a dependency you don't need gradle to care about.
-
-```groovy
-task myCapsule(type:ThinCapsule){
-  applicationClass 'com.foo.BeautifulCalculator'
-  capsuleManifest {
-    dependencyConfiguration configurations.runtime
-    dependencies << 'log4j:log4j:1.2.17'
-  }
-}
-```
-
-## "Really Executable" Capsules
-
-`reallyExecutable` will make a capsule executable as a script in unix environments.
-You may read more in the [capsule documentation][reallyexec].
-
-`reallyExecutable.regular()` is the default and uses a plan execution script.
-`reallyExecutable.trampoline()` will use the trompoline script.
-`reallyExecutable.script(file)` may be set to define your own script.
-
-[reallyexec]:https://github.com/puniverse/capsule#really-executable-capsules
-
-```groovy
-task executableCapsule(type:FatCapsule){
-  applicationClass 'com.foo.CoolCalculator'
-  reallyExecutable //implies regular()
-}
-
-task trampolineCapsule(type:ThinCapsule){
-  applicationClass 'com.foo.CoolCalculator'
-  reallyExecutable { trampoline() }
-}
-
-task myExecutableCapsule(type:FatCapsule){
-  applicationClass 'com.foo.CoolCalculator'
-  reallyExecutable {
-    script file('my_script.sh')
-  }
-}
-```
-
-## Changing the capsule implementation
-
-For advanced usage, `capsuleConfiguration` and `capsuleFilter` control where the capsule implementation comes from.
-You may override them to change implementations, or set them to null and provide your own implemntation somehow else.
-If you override these, you should also change the `capsuleManifest.mainClass` property.
-
-By default for all Capsule types, `capsuleConfiguration` is set to `configurations.capsule`, which is provided by this plugin.
-
-```groovy
-
-configurations {
-  myCapsule
-}
-
-dependencies {
-  myCapsule 'com.foo:MyCapsuleImplementation:0.8'
-}
-
-task myCapsule(type: ThinCapsule){
-  applicationClass 'com.foo.CoolCalculator'
-  capsuleConfiguration configurations.myCapsule
-}
-```
+[group]:https://groups.google.com/forum/#!forum/capsule-user

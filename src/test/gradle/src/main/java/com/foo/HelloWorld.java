@@ -3,6 +3,11 @@ package com.foo;
 class HelloWorld {
   @Override
   public String toString() {
-    return "Hello World";
+    try {
+      Class aClass = HelloWorld.class.getClassLoader().loadClass("org.junit.Test");
+      return "Hello World";
+    } catch (ClassNotFoundException e) {
+      return "Unable to find Junit Test Annotation";
+    }
   }
 }
