@@ -25,7 +25,7 @@ See Also: [Gradle: Jar Tasks](http://gradle.org/docs/current/dsl/org.gradle.api.
 task simpleCapsule(type: FatCapsule){
   applicationClass 'com.foo.SimpleCalculator
   
-  basename 'SimpleCalculator'
+  baseName 'SimpleCalculator'
 }
 
 task configuredCapsule(type: FatCapsule){
@@ -33,7 +33,7 @@ task configuredCapsule(type: FatCapsule){
   
   from 'preconfigration.properties'
 
-  basename 'Calculator'
+  baseName 'Calculator'
   classifier 'configured' //overwrite the default: 'capsule'
 }
 ```
