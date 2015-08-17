@@ -156,6 +156,11 @@ class Capsule extends Jar {
     if (!embedConfiguration) return
 
     from { embedConfiguration }
+
+    rename '(.*).jar', '$1-^^UNIQUE_TOKEN^^-.jar'
+    rename { filename ->
+      filename.replace '^^UNIQUE_TOKEN^^', UUID.randomUUID().toString().replace("-", "")
+    }
   }
 
   protected void makeReallyExecutable() {
