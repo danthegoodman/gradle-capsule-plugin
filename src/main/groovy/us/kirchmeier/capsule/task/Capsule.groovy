@@ -50,6 +50,7 @@ class Capsule extends Jar {
   CapsuleManifest capsuleManifest = new CapsuleManifest()
 
   protected ReallyExecutableSpec _reallyExecutable = null
+  protected HashMap<String,Integer> _embeddedNameCounter = new HashMap<String,Integer>()
 
   Capsule() {
     capsuleConfiguration = project.configurations.capsule
@@ -155,7 +156,9 @@ class Capsule extends Jar {
   protected void applyEmbedConfiguration() {
     if (!embedConfiguration) return
 
-    from { embedConfiguration }
+    from(embedConfiguration){
+      rename { getNonConflictingEmbeddedName(it) }
+    }
   }
 
   protected void makeReallyExecutable() {
@@ -168,5 +171,12 @@ class Capsule extends Jar {
     }
     ant.chmod(file: f, perm: 'ug+x', osfamily: 'unix')
     f.renameTo(outputs.files.singleFile)
+  }
+
+  protected String getNonConflictingEmbeddedName(String name){
+    def i = _embeddedNameCounter.get(name, -1) + 1
+    _embeddedNameCounter[name] = i
+    if(i == 0) return name
+    return "$i-$name"
   }
 }
