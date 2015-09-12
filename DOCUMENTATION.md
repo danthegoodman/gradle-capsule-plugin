@@ -277,4 +277,8 @@ If you really wish to use a different version of capsule, you may set it like so
 project.capsule.version = '1.1'
 ```
 
-This will apply the specified version to the capsule and maven caplet.
+This will apply the specified version to the following configurations:
+
+* `capsule`
+* `capsuleUtil`
+* `mavenCaplet`

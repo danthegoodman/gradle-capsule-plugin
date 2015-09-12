@@ -17,6 +17,7 @@ class CapsuleGradlePlugin implements Plugin<Project> {
       ext.MavenCapsule = MavenCapsule.class
 
       configurations.create('capsule')
+      configurations.create('capsuleUtil')
       configurations.create('mavenCaplet')
       configurations.create('caplet')
 
@@ -36,9 +37,11 @@ class CapsuleGradlePlugin implements Plugin<Project> {
 
     void setVersion(String version){
       project.configurations.capsule.dependencies.clear()
+      project.configurations.capsuleUtil.dependencies.clear()
       project.configurations.mavenCaplet.dependencies.clear()
       project.dependencies {
         capsule "co.paralleluniverse:capsule:${version}"
+        capsuleUtil "co.paralleluniverse:capsule-util:${version}"
         mavenCaplet "co.paralleluniverse:capsule-maven:${version}"
       }
     }

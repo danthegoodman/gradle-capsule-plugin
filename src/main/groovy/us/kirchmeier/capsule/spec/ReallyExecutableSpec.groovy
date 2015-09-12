@@ -40,7 +40,7 @@ class ReallyExecutableSpec {
       return ant.file(file: script)
     }
 
-    def cap = project.configurations.capsule.files.first()
+    def cap = project.configurations.capsuleUtil.files.first()
 
     if (_trampoline) {
       return ant.zipentry(zipfile: cap, name: 'capsule/trampoline-execheader.sh')
