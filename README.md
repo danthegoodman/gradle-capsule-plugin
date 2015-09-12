@@ -2,7 +2,7 @@
 
 A Gradle plugin for [Capsule], the packaging and deployment tool for JVM apps.
 
-[Capsule]:https://github.com/puniverse/capsule/tree/v1.0-rc1
+[Capsule]:http://www.capsule.io/
 
 
 # Adding the Plugin
@@ -55,7 +55,7 @@ The `MavenCapsule` type embeds only your application. It will download dependenc
 
 Under the hood, it uses the [maven capsule][mvn-cap], which caches dependencies after downloading them.
 
-[mvn-cap]: https://github.com/puniverse/capsule-maven/tree/v1.0-rc1
+[mvn-cap]: https://github.com/puniverse/capsule-maven/tree/v1.0.0
 
 ```groovy
 task mavenCapsule(type: MavenCapsule){
@@ -77,7 +77,7 @@ You may configure these using the `capsuleManifest` block.
 
 See also: [Capsule: Manifest Attributes][manifest-cap] and [Source: `CapsuleManifest`][manifest-src]
 
-[manifest-cap]:https://github.com/puniverse/capsule/tree/v1.0-rc1#manifest-attributes 
+[manifest-cap]:http://www.capsule.io/reference/#manifest-attributes
 [manifest-src]:https://github.com/danthegoodman/gradle-capsule-plugin/blob/master/src/main/groovy/us/kirchmeier/capsule/manifest/CapsuleManifest.groovy
 
 ```groovy

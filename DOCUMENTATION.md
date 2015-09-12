@@ -271,16 +271,10 @@ Hello World!
 
 Preferrably, file an issue if the capsule version is out of date. 
 
-If you really wish to use a different version of capsule, you may use this snippet to rewrite a dependecy configuration:
+If you really wish to use a different version of capsule, you may set it like so:
  
 ```groovy
-configurations.capsule.dependencies.clear()
-dependencies {
-  capsule 'co.paralleluniverse:capsule:1.0-rc2'
-}
+project.capsule.version = '1.1'
 ```
 
-The plugin provides two configurations: 
-
-* `capsule` which contains the main capsule jar.
-* `mavenCaplet` which contains the maven caplet jar.
+This will apply the specified version to the capsule and maven caplet.

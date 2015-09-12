@@ -15,5 +15,4 @@ If you make changes to the code, you can run all of the tests with:
 The following locations should be checked for version references when upgrading the capsule version:
 
 * `README.md`, in multiple links
-* `README.md`, in the 
 * `CapsuleGradlePlugin.groovy`, in the dependencies block
