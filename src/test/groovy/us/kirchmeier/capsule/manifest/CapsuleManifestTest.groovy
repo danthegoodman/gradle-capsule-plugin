@@ -12,7 +12,7 @@ public class CapsuleManifestTest {
     m.application = 'foo:bar'
     def result = m.buildAllManifestAttributes()
 
-    assert [(null):['Main-Class': 'Capsule', 'Application': 'foo:bar']] == result
+    assert [(null):['Main-Class': 'Capsule', 'Application': 'foo:bar', 'Premain-Class': 'Capsule']] == result
   }
 
   @Test
@@ -24,7 +24,7 @@ public class CapsuleManifestTest {
     def result = m.buildAllManifestAttributes()
 
     assert result == [
-        (null):['Main-Class': 'Capsule'],
+        (null):['Main-Class': 'Capsule', 'Premain-Class': 'Capsule'],
         'java-7': ['Application': 'foo:bar:j7'],
         'java-8': ['Application': 'foo:bar:j8'],
         'java-9': ['Application': 'foo:bar:j9'],
@@ -37,7 +37,7 @@ public class CapsuleManifestTest {
     m.applicationClass = 'foo.bar'
     def result = m.buildAllManifestAttributes()
 
-    assert [(null):['Main-Class': 'Capsule', 'Application-Class': 'foo.bar']] == result
+    assert [(null):['Main-Class': 'Capsule', 'Application-Class': 'foo.bar', 'Premain-Class': 'Capsule']] == result
   }
 
   @Test
@@ -49,7 +49,7 @@ public class CapsuleManifestTest {
     def result = m.buildAllManifestAttributes()
 
     assert result == [
-        (null):['Main-Class': 'Capsule', 'Application-Class': 'foo.main'],
+        (null):['Main-Class': 'Capsule', 'Application-Class': 'foo.main', 'Premain-Class': 'Capsule'],
         'beta':['Application-Class': 'foo.beta'],
         'gamma':['Application-Class': 'foo.gamma'],
     ]
@@ -61,7 +61,7 @@ public class CapsuleManifestTest {
     m.applicationScript = 'foo.sh'
     def result = m.buildAllManifestAttributes()
 
-    assert [(null):['Main-Class': 'Capsule', 'Application-Script': 'foo.sh']] == result
+    assert [(null):['Main-Class': 'Capsule', 'Application-Script': 'foo.sh', 'Premain-Class': 'Capsule']] == result
   }
 
   @Test
@@ -73,7 +73,7 @@ public class CapsuleManifestTest {
     def result = m.buildAllManifestAttributes()
 
     assert result == [
-        (null):['Main-Class': 'Capsule'],
+        (null):['Main-Class': 'Capsule', 'Premain-Class': 'Capsule'],
         'windows':['Application-Script': 'foo.bat'],
         'macos':['Application-Script': 'foo-osx.sh'],
         'linux':['Application-Script': 'foo-lin.sh'],
@@ -94,7 +94,7 @@ public class CapsuleManifestTest {
     def result = m.buildAllManifestAttributes()
 
     assert result == [
-        (null):['Main-Class': 'Capsule', 'Application': 'foo'],
+        (null):['Main-Class': 'Capsule', 'Application': 'foo', 'Premain-Class': 'Capsule'],
         'alpha-windows':['System-Properties': 'x=1'],
         'beta-windows':['System-Properties': 'x=2'],
         'alpha-macos':['System-Properties': 'x=3'],
@@ -108,7 +108,7 @@ public class CapsuleManifestTest {
     m.javaVersion = ""
     def result = m.buildAllManifestAttributes()
 
-    assert [(null):['Main-Class': 'Capsule', 'Application': 'foo']] == result
+    assert [(null):['Main-Class': 'Capsule', 'Application': 'foo', 'Premain-Class': 'Capsule']] == result
   }
 
   @Test

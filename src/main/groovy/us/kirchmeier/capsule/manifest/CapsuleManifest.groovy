@@ -6,6 +6,9 @@ import org.gradle.util.ConfigureUtil
 
 class CapsuleManifest {
 
+  @ManifestSetting('Premain-Class')
+  public String premainClass
+
   @ManifestSetting('Main-Class')
   public String mainClass
 
@@ -164,6 +167,7 @@ class CapsuleManifest {
       if(result.containsKey(name)) throw new IllegalStateException("Cannot resolve capsule attributes for duplicate grouping '${name}'");
       result[name] = attrs;
     }
+    result[null].get('Premain-Class', 'Capsule');
     result[null].get('Main-Class', 'Capsule');
     validateSettings(result)
     return result;
