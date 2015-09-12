@@ -1,6 +1,8 @@
 package us.kirchmeier.capsule.task
 
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.FileCollectionDependency
+import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.util.ConfigureUtil
 import us.kirchmeier.capsule.manifest.CapsuleManifest
@@ -124,6 +126,7 @@ class Capsule extends Jar {
     applyDefaultCapletSet()
     applyApplicationSource()
     applyEmbedConfiguration()
+    applyFileDependenciesFromManifestDependencies()
 
     def attrs = capsuleManifest.buildAllManifestAttributes();
     attrs.each { k, v ->
@@ -157,6 +160,20 @@ class Capsule extends Jar {
     if (!embedConfiguration) return
 
     from(embedConfiguration){
+      rename { getNonConflictingEmbeddedName(it) }
+    }
+  }
+
+  protected void applyFileDependenciesFromManifestDependencies() {
+    def dc = capsuleManifest.dependencyConfiguration
+    if (!dc) return
+
+    def files = dc.allDependencies
+        .findAll { it instanceof FileCollectionDependency }
+        .collectMany { FileCollectionDependency d -> d.resolve() }
+    if(!files) return
+
+    from(files){
       rename { getNonConflictingEmbeddedName(it) }
     }
   }

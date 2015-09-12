@@ -232,7 +232,10 @@ class CapsuleManifest {
 
   private includeDependencyConfiguration() {
     if (!dependencyConfiguration) return
-    def deps = dependencyConfiguration.allDependencies.collect { d -> formatModuleDependency(d) }.sort()
+    def deps = dependencyConfiguration.allDependencies
+        .findAll { it instanceof ModuleDependency }
+        .collect { d -> formatModuleDependency(d) }
+        .sort()
     dependencies.addAll(deps)
   }
 
