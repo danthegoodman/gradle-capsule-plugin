@@ -1,29 +1,22 @@
-buildscript {
-  repositories {
-    jcenter()
-  }
-  dependencies {
-    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
-  }
+plugins {
+  id "com.gradle.plugin-publish" version "0.9.1"
 }
+
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'idea'
-apply plugin: 'com.jfrog.bintray'
 
-ext.isSnapshot = version == 'SNAPSHOT'
-
-def project_description = """
+def project_description = """\
 A Gradle plugin utilizing Capsule, the packaging and deployment tool for JVM apps.
-(https://github.com/puniverse/capsule)
+(http://www.capsule.io)
 """
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -41,39 +34,22 @@ artifacts {
     archives sourcesJar
 }
 
-bintrayUpload.doFirst {
-  if(isSnapshot){
-    println "Rerun with '-Pversion=...' to set a real version and actually upload the plugin"
-  } else {
-    println "Go publish it! https://bintray.com/danthegoodman/maven/gradle-capsule-plugin/"
-  }
-}
+pluginBundle {
+  website = 'https://github.com/danthegoodman/gradle-capsule-plugin'
+  vcsUrl = 'https://github.com/danthegoodman/gradle-capsule-plugin.git'
+  description = project_description
+  tags = ['shade', 'fatjar', 'uberjar', 'onejar', 'capsule']
 
-bintray {
-  user = project.hasProperty('bintrayUser') ? bintrayUser : ''
-  key = project.hasProperty('bintrayKey') ? bintrayKey : ''
-
-  configurations = ['archives']
-
-  dryRun = isSnapshot
-  publish = false
-
-  pkg {
-    repo = 'maven'
-    name = 'gradle-capsule-plugin'
-    desc = project_description
-    websiteUrl = 'https://github.com/danthegoodman/gradle-capsule-plugin'
-    issueTrackerUrl = 'https://github.com/danthegoodman/gradle-capsule-plugin/issues'
-    vcsUrl = 'https://github.com/danthegoodman/gradle-capsule-plugin.git'
-    licenses = ['MIT']
-    labels = ['shade', 'fatjar', 'uberjar', 'onejar', 'capsule']
-    publicDownloadNumbers = true
-
-    version {
-      name = project.version
-      vcsTag = project.version
-      attributes = ['gradle-plugin': 'us.kirchmeier.capsule:us.kirchmeier:gradle-capsule-plugin']
+  plugins {
+    capsulePlugin {
+      id = 'us.kirchmeier.capsule'
+      displayName = 'Gradle Capsule Plugin'
     }
+  }
+
+  mavenCoordinates {
+    groupId = 'us.kirchmeier'
+    artifactId = "gradle-capsule-plugin"
   }
 }
 
