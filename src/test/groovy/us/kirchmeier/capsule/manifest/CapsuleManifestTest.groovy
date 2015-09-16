@@ -1,8 +1,6 @@
 package us.kirchmeier.capsule.manifest
-
 import org.gradle.testfixtures.ProjectBuilder
 import org.testng.annotations.Test
-import us.kirchmeier.capsule.manifest.CapsuleManifest;
 
 public class CapsuleManifestTest {
 
@@ -13,6 +11,16 @@ public class CapsuleManifestTest {
     def result = m.buildAllManifestAttributes()
 
     assert [(null):['Main-Class': 'Capsule', 'Application': 'foo:bar', 'Premain-Class': 'Capsule']] == result
+  }
+
+  @Test
+  public void "build manifest attributes with custom attributes"() {
+    def m = new CapsuleManifest()
+    m.application = 'foo:bar'
+    m.customEntries = ["GUI": "true"]
+    def result = m.buildAllManifestAttributes()
+
+    assert [(null):['Main-Class': 'Capsule', 'Application': 'foo:bar', 'Premain-Class': 'Capsule', 'GUI': 'true']] == result
   }
 
   @Test
