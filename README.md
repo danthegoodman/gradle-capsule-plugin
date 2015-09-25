@@ -4,8 +4,11 @@ A Gradle plugin for [Capsule], the packaging and deployment tool for JVM apps.
 
 [Capsule]:http://www.capsule.io/
 
-
 # Adding the Plugin
+
+This plugin requires Gradle 2.0 and above.
+
+With gradle 2.1+, simply define the plugins at the top of your build script:
 
 ```groovy
 plugins {
@@ -13,6 +16,7 @@ plugins {
 }
 ```
 
+For gradle 2.0, [you will need to use the more verbose style](https://plugins.gradle.org/plugin/us.kirchmeier.capsule).
 
 # Quick Start
 
