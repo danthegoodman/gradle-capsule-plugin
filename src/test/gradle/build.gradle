@@ -78,9 +78,6 @@ task recreatedMavenCapsule(type: Capsule){
   capsuleManifest{
     dependencyConfiguration configurations.runtime
     caplets << 'MavenCapsule'
-    customEntries (
-            "GUI": "true"
-    )
   }
   buildTests(delegate, executable: false, maven: true)
 }
