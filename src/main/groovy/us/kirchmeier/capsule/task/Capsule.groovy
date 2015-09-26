@@ -1,8 +1,7 @@
 package us.kirchmeier.capsule.task
-
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.FileCollectionDependency
-import org.gradle.api.artifacts.ModuleDependency
+import org.gradle.api.java.archives.internal.DefaultManifest
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.util.ConfigureUtil
 import us.kirchmeier.capsule.manifest.CapsuleManifest
@@ -195,5 +194,14 @@ class Capsule extends Jar {
     _embeddedNameCounter[name] = i
     if(i == 0) return name
     return "$i-$name"
+  }
+
+  @Override
+  Capsule manifest(Closure configureClosure) {
+    if (getManifest() == null) {
+      manifest = new DefaultManifest(project.fileResolver)
+    }
+    ConfigureUtil.configure(configureClosure, getManifest());
+    return this;
   }
 }

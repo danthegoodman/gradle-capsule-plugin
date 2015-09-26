@@ -111,8 +111,6 @@ class CapsuleManifest {
   @ManifestSetting('Description')
   public String modeDescription
 
-  public LinkedHashMap<String, String> customEntries;
-
   /**
    * The configuration describing the dependencies to list in the manifest.
    * <p>These dependencies are added to the dependency list; they will not overwrite it.</p>
@@ -214,10 +212,6 @@ class CapsuleManifest {
       if (canIncludeValue(field.type, value)) {
         result[ms.value()] = formatValue(value)
       }
-    }
-
-    self.customEntries.each {
-      result[it.key] = it.value
     }
 
     return result
