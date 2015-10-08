@@ -12,7 +12,7 @@ With gradle 2.1+, simply define the plugins at the top of your build script:
 
 ```groovy
 plugins {
-  id "us.kirchmeier.capsule" version "1.0-rc1"
+  id "us.kirchmeier.capsule" version "1.0.1"
 }
 ```
 
