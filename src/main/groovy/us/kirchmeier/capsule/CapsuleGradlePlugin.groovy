@@ -24,7 +24,7 @@ class CapsuleGradlePlugin implements Plugin<Project> {
       configurations.mavenCaplet.extendsFrom(configurations.caplet)
 
       def capsuleExt = project.extensions.create("capsule", CapsuleGradleExtension, project)
-      capsuleExt.version = '1.0'
+      capsuleExt.version = '1.0.1'
     }
   }
 
