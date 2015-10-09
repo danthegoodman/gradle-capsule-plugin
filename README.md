@@ -6,17 +6,16 @@ A Gradle plugin for [Capsule], the packaging and deployment tool for JVM apps.
 
 # Adding the Plugin
 
-This plugin requires Gradle 2.0 and above.
-
-With gradle 2.1+, simply define the plugins at the top of your build script:
+This plugin requires Gradle 2.4 and above.
+Simply define the plugins at the top of your build script:
 
 ```groovy
 plugins {
-  id "us.kirchmeier.capsule" version "1.0-rc1"
+  id "us.kirchmeier.capsule" version "1.0.1"
 }
 ```
 
-For gradle 2.0, [you will need to use the more verbose style](https://plugins.gradle.org/plugin/us.kirchmeier.capsule).
+Gradle 2.0 to 2.3 were last supported with [plugin version 1.0.0](https://plugins.gradle.org/plugin/us.kirchmeier.capsule/1.0.0).
 
 # Quick Start
 

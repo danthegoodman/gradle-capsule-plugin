@@ -82,6 +82,27 @@ task recreatedMavenCapsule(type: Capsule){
   buildTests(delegate, executable: false, maven: true)
 }
 
+project('subproject') {
+  apply plugin: 'us.kirchmeier.capsule'
+
+  repositories {
+    jcenter()
+  }
+
+  dependencies {
+    compile project.parent
+  }
+
+  task fatCapsuleInSubproject(type: FatCapsule){
+    applicationClass 'com.foo.Main'
+    classifier 'fat-subproject'
+    manifest { //Tests issue #13, where this broke subprojects
+      attributes('Main-Class': 'Capsule')
+    }
+    buildTests(delegate, executable: false, fat: true, additionalContents: ['subproject.jar'])
+  }
+}
+
 private void buildTests(Map options, task) {
   def name = task.name
   def f = task.outputs.files.singleFile
@@ -121,30 +142,30 @@ private void testContents(file, options) {
     }
   }
 
-  projectFiles.sort()
+  def expectedFiles = [
+      'Capsule.class',
+      'META-INF/',
+      'META-INF/MANIFEST.MF',
+      'settings.gradle',
+      'test-project.jar',
+  ]
+  expectedFiles.addAll(options.additionalContents ?: [])
+
   if (options.fat) {
-    assert projectFiles == [
+    expectedFiles.addAll([
         '1-commons-1.0.0.jar',
-        'Capsule.class',
-        'META-INF/',
-        'META-INF/MANIFEST.MF',
         'ant-1.9.3.jar',
         'commons-1.0.0.jar',
         'hamcrest-core-1.3.jar',
         'junit-4.11.jar',
-        'settings.gradle',
-        'test-project.jar',
-    ]
+    ])
   } else if (options.maven) {
-    assert projectFiles == [
-        'Capsule.class',
-        'META-INF/',
-        'META-INF/MANIFEST.MF',
-        'MavenCapsule.class',
-        'settings.gradle',
-        'test-project.jar',
-    ]
+    expectedFiles << 'MavenCapsule.class'
   }
+
+  projectFiles.sort()
+  expectedFiles.sort()
+  assert projectFiles == expectedFiles
 
   def jm = f.manifest.mainAttributes
   assert jm.getValue('Application-Id') ==~ /com\.foo\.\w+/

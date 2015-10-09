@@ -7,9 +7,12 @@ import us.kirchmeier.capsule.task.FatCapsule
 import us.kirchmeier.capsule.task.MavenCapsule
 
 class CapsuleGradlePlugin implements Plugin<Project> {
+  private static final REQUIRED_GRADLE_MAJOR_VERSION = 2
+  private static final REQUIRED_GRADLE_MINOR_VERSION = 4
 
   @Override
   void apply(Project project) {
+    validateGradleVersion(project)
     project.with {
       apply(plugin: 'java')
       ext.Capsule = Capsule.class
@@ -45,5 +48,25 @@ class CapsuleGradlePlugin implements Plugin<Project> {
         mavenCaplet "co.paralleluniverse:capsule-maven:${version}"
       }
     }
+  }
+
+  void validateGradleVersion(Project project){
+    def version = project.gradle.gradleVersion
+    def dotNdx = version.indexOf('.')
+    if(dotNdx == -1) return;
+
+    int major, minor;
+    try{
+      major = version.substring(0, dotNdx) as Integer;
+      minor = version.substring(dotNdx+1) as Integer;
+    } catch(NumberFormatException ignored){
+      return;
+    }
+
+    if(major > REQUIRED_GRADLE_MAJOR_VERSION) return;
+    if(major == REQUIRED_GRADLE_MAJOR_VERSION && minor >= REQUIRED_GRADLE_MINOR_VERSION) return;
+
+    project.logger.error("The capsule plugin requires gradle v${REQUIRED_GRADLE_MAJOR_VERSION}.${REQUIRED_GRADLE_MINOR_VERSION} and above.")
+    project.logger.error("You may receieve unexpected errors if you do not upgrade.")
   }
 }

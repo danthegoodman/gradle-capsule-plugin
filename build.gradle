@@ -56,18 +56,3 @@ pluginBundle {
 test {
     useTestNG()
 }
-
-task testIntegration(dependsOn:'jar', group: 'Verification', description: 'Runs the integration tests') << {
-  println("--------------------------------------------------------------------------------")
-  def baseDir = "${projectDir}/src/test/gradle"
-
-  def proc = ["${baseDir}/gradlew", "clean", "self-test"].execute(null, file(baseDir))
-  proc.consumeProcessOutput(System.out, System.err)
-  int exitCode = proc.waitFor()
-  println("--------------------------------------------------------------------------------")
-  if(exitCode != 0){
-    throw new GradleException("Integration Tests Failed")
-  }
-}
-
-check.dependsOn testIntegration
