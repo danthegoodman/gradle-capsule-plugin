@@ -4,7 +4,7 @@ This documentation is highly technical and expects familiarity with gradle and t
 
 If you haven't already, check out the [README].
 
-[Capsule]:https://github.com/puniverse/capsule
+[Capsule]:http://www.capsule.io/
 [README]:https://github.com/danthegoodman/gradle-capsule-plugin
 
 
@@ -49,7 +49,7 @@ There base `applicationClass` property just applies the value into `capsuleManif
 
 See also: [Capsule: Manifest Attributes][manifest-cap] and [Source: `CapsuleManifest`][manifest-src]
 
-[manifest-cap]:https://github.com/puniverse/capsule/tree/v1.0-rc1#manifest-attributes 
+[manifest-cap]:http://www.capsule.io/reference/#manifest-attributes
 [manifest-src]:https://github.com/danthegoodman/gradle-capsule-plugin/blob/master/src/main/groovy/us/kirchmeier/capsule/manifest/CapsuleManifest.groovy
 
 ```groovy
@@ -89,7 +89,7 @@ Changing this value will allow you to configure caplets between different capsul
 `MavenCapsule` technically has a default of `mavenCaplet`, which includes this maven capsule, but this configuration
 extends the `caplet` dependency configuration.
 
-See Also: [Capsule: What are caplets?](https://github.com/puniverse/capsule/tree/v1.0-rc1#what-are-caplets)
+See Also: [Capsule: What are caplets?](http://www.capsule.io/)
 
 ```
 dependencies {
@@ -123,7 +123,7 @@ You can couple this with `applicationScript` for starting from a script instead 
 
 `java` blocks allow you to configure your application for specific JVM versions.
 
-See Also: [Capsule: Modes and more](https://github.com/puniverse/capsule/tree/v1.0-rc1#modes-platform--and-version-specific-configuration)
+See Also: [Capsule: Modes and more](http://www.capsule.io/user-guide/#modes-platform--and-version-specific-configuration)
 
 ```groovy
 task modeCapsule(type: FatCapsule){
@@ -237,7 +237,7 @@ task beautifulCapsule(type:MavenCapsule){
 `reallyExecutable.trampoline()` will use the trompoline script.
 `reallyExecutable.script(file)` may be set to define your own script.
 
-See More: [Capsule: Really Executable](https://github.com/puniverse/capsule/tree/v1.0-rc1#really-executable-capsules)
+See More: [Capsule: Really Executable](http://www.capsule.io/user-guide/#really-executable-capsules)
 
 ```groovy
 task executableCapsule(type:FatCapsule){

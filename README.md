@@ -58,7 +58,7 @@ The `MavenCapsule` type embeds only your application. It will download dependenc
 
 Under the hood, it uses the [maven capsule][mvn-cap], which caches dependencies after downloading them.
 
-[mvn-cap]: https://github.com/puniverse/capsule-maven/tree/v1.0.0
+[mvn-cap]: https://github.com/puniverse/capsule-maven/
 
 ```groovy
 task mavenCapsule(type: MavenCapsule){
