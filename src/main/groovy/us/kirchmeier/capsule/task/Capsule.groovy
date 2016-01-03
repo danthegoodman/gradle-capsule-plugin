@@ -187,7 +187,7 @@ class Capsule extends Jar {
       }
     }
     ant.chmod(file: f, perm: 'ug+x', osfamily: 'unix')
-    f.renameTo(outputs.files.singleFile)
+    ant.move(file: f, tofile: outputs.files.singleFile)
   }
 
   protected String getNonConflictingEmbeddedName(String name){
