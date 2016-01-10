@@ -234,7 +234,7 @@ task beautifulCapsule(type:MavenCapsule){
 `reallyExecutable` will make a capsule executable as a script in unix environments.
 
 `reallyExecutable.regular()` is the default and uses a plan execution script.
-`reallyExecutable.trampoline()` will use the trompoline script.
+`reallyExecutable.trampolining()` will use the trompoline script.
 `reallyExecutable.script(file)` may be set to define your own script.
 
 See More: [Capsule: Really Executable](http://www.capsule.io/user-guide/#really-executable-capsules)
@@ -247,7 +247,7 @@ task executableCapsule(type:FatCapsule){
 
 task trampolineCapsule(type:MavenCapsule){
   applicationClass 'com.foo.CoolCalculator'
-  reallyExecutable { trampoline() }
+  reallyExecutable { trampolining() }
 }
 
 task myExecutableCapsule(type:FatCapsule){

@@ -15,7 +15,18 @@ class ReallyExecutableSpec {
     return this
   }
 
+  /**
+   * Deprecated because this conflicts with the closure method 'trampoline()'
+   *
+   * @deprecated Use trampolining() instead
+   * @return
+   */
+  @Deprecated
   ReallyExecutableSpec trampoline() {
+    return this.trampolining()
+  }
+
+  ReallyExecutableSpec trampolining() {
     _regular = false
     _trampoline = true
     script = null

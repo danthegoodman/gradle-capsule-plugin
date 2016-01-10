@@ -39,25 +39,25 @@ ext.selfTest = task('self-test')
 task fatCapsule(type: FatCapsule) {
   applicationClass 'com.foo.Main'
   classifier 'fat'
-  buildTests(delegate, executable: false, fat: true)
+  buildTests(delegate, executableScript: null, fat: true)
 }
 task fatCapsuleExecutable(type: FatCapsule) {
   applicationClass 'com.foo.Main'
   classifier 'fatExec'
   reallyExecutable
-  buildTests(delegate, executable: true, fat: true)
+  buildTests(delegate, executableScript: 'regular', fat: true)
 }
 
 task mavenCapsule(type: MavenCapsule) {
   applicationClass 'com.foo.Main'
   classifier 'maven'
-  buildTests(delegate, executable: false, maven: true)
+  buildTests(delegate, executableScript: null, maven: true)
 }
 task mavenCapsuleExecutable(type: MavenCapsule) {
   applicationClass 'com.foo.Main'
   classifier 'mavenExec'
-  reallyExecutable { trampoline() }
-  buildTests(delegate, executable: true, maven: true)
+  reallyExecutable { trampolining() }
+  buildTests(delegate, executableScript: 'trampoline', maven: true)
 }
 
 task platformCapsule(type: FatCapsule) {
@@ -67,7 +67,7 @@ task platformCapsule(type: FatCapsule) {
     platform('linux') { applicationClass 'com.foo.Main' }
   }
   classifier 'platform'
-  buildTests(delegate, executable: false, fat: true)
+  buildTests(delegate, executableScript: null, fat: true)
 }
 
 task recreatedMavenCapsule(type: Capsule){
@@ -79,7 +79,7 @@ task recreatedMavenCapsule(type: Capsule){
     dependencyConfiguration configurations.runtime
     caplets << 'MavenCapsule'
   }
-  buildTests(delegate, executable: false, maven: true)
+  buildTests(delegate, executableScript: null, maven: true)
 }
 
 project('subproject') {
@@ -99,7 +99,7 @@ project('subproject') {
     manifest { //Tests issue #13, where this broke subprojects
       attributes('Main-Class': 'Capsule')
     }
-    buildTests(delegate, executable: false, fat: true, additionalContents: ['subproject.jar'])
+    buildTests(delegate, executableScript: null, fat: true, additionalContents: ['subproject.jar'])
   }
 }
 
@@ -121,7 +121,7 @@ private void buildTests(Map options, task) {
 }
 
 private void testOutput(f, options) {
-  def cmd = options.executable ? [f.absolutePath] : ['java', '-Dcapsule.log2=ALL', '-jar', f.absolutePath]
+  def cmd = options.executableScript ? [f.absolutePath] : ['java', '-Dcapsule.log2=ALL', '-jar', f.absolutePath]
   def env = System.getenv().collect{ k,v -> "$k=$v" }
   env << "CAPSULE_CACHE_DIR=${Files.createTempDirectory("gradle_capsule_test")}";
   def proc = cmd.execute(env, null)
@@ -133,7 +133,7 @@ private void testOutput(f, options) {
   assert exitCode == 0
 }
 
-private void testContents(file, options) {
+private void testContents(File file, options) {
   def f = new JarFile(file, false)
   def projectFiles = new ArrayList<String>()
   f.entries().each {
@@ -181,4 +181,29 @@ private void testContents(file, options) {
     assert jm.size() == 7
   }
 
+  if(options.executableScript){
+    def expectedReallyExecutableHeader = getExecutableScriptContents(options.executableScript)
+    def expectedLines = expectedReallyExecutableHeader.split(System.lineSeparator()).length
+    def actualReallyExecutableHeader = file.readLines()[0..<expectedLines].join(System.lineSeparator())
+
+    if(expectedReallyExecutableHeader != actualReallyExecutableHeader){
+      assert expectedReallyExecutableHeader == actualReallyExecutableHeader
+    }
+  }
+}
+
+private String getExecutableScriptContents(String type){
+  def cap = project.configurations.capsuleUtil.files.first()
+
+  def filename;
+  if (type == 'trampoline') {
+    filename = 'capsule/trampoline-execheader.sh'
+  } else if (type == 'regular') {
+    filename = 'capsule/execheader.sh'
+  } else {
+      throw new IllegalArgumentException("Unknown executable script type '$type'");
+  }
+
+  def ze = ant.zipentry(zipfile: cap, name: filename)
+  return ze.inputStream.text.trim()
 }
