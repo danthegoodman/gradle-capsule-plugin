@@ -48,6 +48,9 @@ class ReallyExecutableSpec {
 
   def buildAntResource(Project project, AntBuilder ant) {
     if (script != null) {
+      if(!script.exists()) {
+        throw new IllegalArgumentException("Unable to locate reallyExecutable script: ${script}");
+      }
       return ant.file(file: script)
     }
 
