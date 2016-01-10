@@ -14,7 +14,7 @@ Simply define the plugins at the top of your build script:
 
 ```groovy
 plugins {
-  id "us.kirchmeier.capsule" version "1.0.1"
+  id "us.kirchmeier.capsule" version "1.0.2"
 }
 ```
 
