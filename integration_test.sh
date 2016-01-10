@@ -5,10 +5,12 @@
 #
 # Requires http://sdkman.io/ to be installed.
 
-VERSIONS=(2.{7..4})
+VERSIONS=(2.{10..4})
 
 export SDKMAN_DIR=~/.sdkman
-[[ -s "/Users/danny/.sdkman/bin/sdkman-init.sh" ]] && source "/Users/danny/.sdkman/bin/sdkman-init.sh"
+[[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
+
+./gradlew clean jar
 
 cd src/test/gradle
 
