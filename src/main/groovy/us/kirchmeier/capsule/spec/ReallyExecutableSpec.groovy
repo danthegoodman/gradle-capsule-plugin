@@ -1,12 +1,18 @@
 package us.kirchmeier.capsule.spec
 
 import org.gradle.api.Project
+import org.gradle.api.tasks.TaskInputs
 
 class ReallyExecutableSpec {
 
   File script
   protected boolean _regular = true
   protected boolean _trampoline = false
+  protected TaskInputs _taskInputs
+  
+  ReallyExecutableSpec(TaskInputs taskInputs) {
+    _taskInputs = taskInputs
+  }
 
   ReallyExecutableSpec regular() {
     _regular = true
@@ -43,6 +49,7 @@ class ReallyExecutableSpec {
 
   ReallyExecutableSpec script(File file) {
     script = file
+    _taskInputs.file script
     return this
   }
 

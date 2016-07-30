@@ -107,7 +107,7 @@ class Capsule extends Jar {
 
   public ReallyExecutableSpec getReallyExecutable(){
     if(_reallyExecutable == null){
-      _reallyExecutable = new ReallyExecutableSpec();
+      _reallyExecutable = new ReallyExecutableSpec(inputs);
     }
     return _reallyExecutable;
   }
