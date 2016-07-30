@@ -1,0 +1,36 @@
+language: java
+
+jdk:
+- oraclejdk8
+- oraclejdk7
+- openjdk7
+
+env:
+- GRADLE_VERSION=2.10
+- GRADLE_VERSION=2.9
+- GRADLE_VERSION=2.8
+- GRADLE_VERSION=2.7
+- GRADLE_VERSION=2.6
+- GRADLE_VERSION=2.5
+- GRADLE_VERSION=2.4
+
+install:
+- curl -s "https://get.sdkman.io" | bash && source "$HOME/.sdkman/bin/sdkman-init.sh"
+- echo sdkman_auto_answer=true > ~/.sdkman/etc/config
+- sdk install gradle $GRADLE_VERSION
+
+script:
+- ./gradlew check jar
+- cd src/test/gradle
+- sdk use gradle $GRADLE_VERSION
+- GRADLE=$GRADLE_HOME/bin/gradle
+- $GRADLE -v
+- $GRADLE clean self-test
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
