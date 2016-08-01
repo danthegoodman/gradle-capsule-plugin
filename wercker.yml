@@ -1,0 +1,23 @@
+box: {id: 'java:8-jdk-alpine', cmd: '/bin/sh'}
+
+check:
+  steps:
+  - script:
+      name: check plugin
+      code: |
+        apk --update add bash
+        ./gradlew check
+
+integration test:
+  steps:
+  - script:
+      name: install sdkman
+      code: |
+        apk --update add curl bash
+        curl -s "https://get.sdkman.io" | bash
+        echo 'sdkman_auto_answer=true' > ~/.sdkman/etc/config
+  - script:
+      name: integration test
+      code: |
+        apk --update add bash unzip libstdc++
+        ./integration_test.sh
