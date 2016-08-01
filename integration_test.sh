@@ -15,6 +15,7 @@ export SDKMAN_DIR=~/.sdkman
 cd src/test/gradle
 
 for grdlVersion in ${VERSIONS[*]}; do
+  sdk install gradle $grdlVersion
   sdk use gradle $grdlVersion
   gradle clean self-test
 done
