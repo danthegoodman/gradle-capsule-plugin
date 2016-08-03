@@ -6,3 +6,5 @@ out
 *.iml
 *.ipr
 *.iws
+
+src/test/gradle/gradle/wrapper/gradle-wrapper.properties

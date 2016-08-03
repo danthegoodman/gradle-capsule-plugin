@@ -6,13 +6,15 @@ Thank you for being willing to contribute!
 
 This project has unit tests for testing some of the written logic, and integration tests for validating against an example gradle project.
 
-If you make changes to the code, you can run all of the tests with:
+If you have some time on your hands and are running on a *nix machine, you can run the full test suite with:
+
+    ./test.sh
+
+But that command can take at least 5 minutes to run.
+If you want to run a quicker and less comprehensive suite, just run the unit tests:
 
     ./gradlew check
 
-If you feel brave and are running on a *nix machine, you can run additional tests via:
-
-    ./integration_test.sh
 
 ## Updating the Capsule Version
 
