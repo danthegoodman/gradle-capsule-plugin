@@ -14,11 +14,11 @@ export SDKMAN_DIR=~/.sdkman
 
 cd src/test/gradle
 
+RESULT=0
 for grdlVersion in ${VERSIONS[*]}; do
+  sdk install gradle $grdlVersion
   sdk use gradle $grdlVersion
   gradle clean self-test
+  RESULT+=$?
 done
-
-
-
-
+exit $RESULT
