@@ -1,6 +1,3 @@
-import java.nio.file.Files
-import java.util.jar.JarFile
-
 buildscript {
   dependencies {
     classpath fileTree('../../../build/libs')
@@ -34,54 +31,6 @@ jar {
   baseName 'test-project'
 }
 
-ext.selfTest = task('self-test')
-
-task fatCapsule(type: FatCapsule) {
-  applicationClass 'com.foo.Main'
-  classifier 'fat'
-  buildTests(delegate, executableScript: null, fat: true)
-}
-task fatCapsuleExecutable(type: FatCapsule) {
-  applicationClass 'com.foo.Main'
-  classifier 'fatExec'
-  reallyExecutable
-  buildTests(delegate, executableScript: 'regular', fat: true)
-}
-
-task mavenCapsule(type: MavenCapsule) {
-  applicationClass 'com.foo.Main'
-  classifier 'maven'
-  buildTests(delegate, executableScript: null, maven: true)
-}
-task mavenCapsuleExecutable(type: MavenCapsule) {
-  applicationClass 'com.foo.Main'
-  classifier 'mavenExec'
-  reallyExecutable { trampolining() }
-  buildTests(delegate, executableScript: 'trampoline', maven: true)
-}
-
-task platformCapsule(type: FatCapsule) {
-  capsuleManifest {
-    platform('macos') { applicationClass 'com.foo.Main' }
-    platform('windows') { applicationClass 'com.foo.Main' }
-    platform('linux') { applicationClass 'com.foo.Main' }
-  }
-  classifier 'platform'
-  buildTests(delegate, executableScript: null, fat: true)
-}
-
-task recreatedMavenCapsule(type: Capsule){
-  applicationClass 'com.foo.Main'
-  classifier 'recreated'
-  applicationSource jar
-  capletConfiguration configurations.mavenCaplet
-  capsuleManifest{
-    dependencyConfiguration configurations.runtime
-    caplets << 'MavenCapsule'
-  }
-  buildTests(delegate, executableScript: null, maven: true)
-}
-
 project('subproject') {
   apply plugin: 'us.kirchmeier.capsule'
 
@@ -92,118 +41,67 @@ project('subproject') {
   dependencies {
     compile project.parent
   }
+}
 
+task fatCapsule(type: FatCapsule) {
+  applicationClass 'com.foo.Main'
+}
+task fatCapsuleExecutable(type: FatCapsule) {
+  applicationClass 'com.foo.Main'
+  reallyExecutable
+}
+
+task mavenCapsule(type: MavenCapsule) {
+  applicationClass 'com.foo.Main'
+}
+task mavenCapsuleExecutable(type: MavenCapsule) {
+  applicationClass 'com.foo.Main'
+  reallyExecutable { trampolining() }
+}
+
+task platformCapsule(type: FatCapsule) {
+  capsuleManifest {
+    platform('macos') { applicationClass 'com.foo.Main' }
+    platform('windows') { applicationClass 'com.foo.Main' }
+    platform('linux') { applicationClass 'com.foo.Main' }
+  }
+}
+
+task recreatedMavenCapsule(type: Capsule){
+  applicationClass 'com.foo.Main'
+  applicationSource jar
+  capletConfiguration configurations.mavenCaplet
+  capsuleManifest{
+    dependencyConfiguration configurations.runtime
+    caplets << 'MavenCapsule'
+  }
+}
+
+task customExecutableScript(type: FatCapsule){
+  applicationClass 'com.foo.Main'
+  reallyExecutable { script(file('really-executable.sh')) }
+}
+
+project('subproject') {
   task fatCapsuleInSubproject(type: FatCapsule){
     applicationClass 'com.foo.Main'
-    classifier 'fat-subproject'
     manifest { //Tests issue #13, where this broke subprojects
       attributes('Main-Class': 'Capsule')
     }
-    buildTests(delegate, executableScript: null, fat: true, additionalContents: ['subproject.jar'])
   }
 }
 
-private void buildTests(Map options, task) {
-  def name = task.name
-  def f = task.outputs.files.singleFile
-  task.capsuleManifest.applicationId = "com.foo.${name}".toString()
-
-  project.task("test-output-$name", dependsOn: [task]) << {
-    testOutput(f, options)
-  }
-  project.task("test-contents-$name", dependsOn: [task]) << {
-    testContents(f, options)
-  }
-  selfTest.dependsOn.addAll([
-      "test-output-$name",
-      "test-contents-$name"
-  ])
+task runScript() << {
+  if(!project.hasProperty('testScript')) throw new Exception("Missing -PtestScript=...")
+  evaluate(new File(project.property('testScript')))
 }
 
-private void testOutput(f, options) {
-  def cmd = options.executableScript ? [f.absolutePath] : ['java', '-Dcapsule.log2=ALL', '-jar', f.absolutePath]
-  def env = System.getenv().collect{ k,v -> "$k=$v" }
-  env << "CAPSULE_CACHE_DIR=${Files.createTempDirectory("gradle_capsule_test")}";
-  def proc = cmd.execute(env, null)
-  def out = new ByteArrayOutputStream()
-  proc.consumeProcessOutput(out, System.err)
-  int exitCode = proc.waitFor()
-  def strOut = new String(out.toByteArray());
-  assert strOut == 'Hello World\n'
-  assert exitCode == 0
-}
+def buildAllTask = task('buildAll')
+allprojects.each {
+  it.tasks.withType(Capsule).each {
+    buildAllTask.dependsOn.add(it)
 
-private void testContents(File file, options) {
-  def f = new JarFile(file, false)
-  def projectFiles = new ArrayList<String>()
-  f.entries().each {
-    if (!it.name.startsWith('capsule/')) {
-      projectFiles << it.name
-    }
+    it.destinationDir = file("${project.buildDir}/capsules")
+    it.archiveName = "${it.name}.jar"
   }
-
-  def expectedFiles = [
-      'Capsule.class',
-      'META-INF/',
-      'META-INF/MANIFEST.MF',
-      'settings.gradle',
-      'test-project.jar',
-  ]
-  expectedFiles.addAll(options.additionalContents ?: [])
-
-  if (options.fat) {
-    expectedFiles.addAll([
-        '1-commons-1.0.0.jar',
-        'ant-1.9.3.jar',
-        'commons-1.0.0.jar',
-        'hamcrest-core-1.3.jar',
-        'junit-4.11.jar',
-    ])
-  } else if (options.maven) {
-    expectedFiles << 'MavenCapsule.class'
-  }
-
-  projectFiles.sort()
-  expectedFiles.sort()
-  assert projectFiles == expectedFiles
-
-  def jm = f.manifest.mainAttributes
-  assert jm.getValue('Application-Id') ==~ /com\.foo\.\w+/
-  assert jm.getValue('Manifest-Version') != null
-  assert jm.getValue('Premain-Class') == 'Capsule'
-  assert jm.getValue('Main-Class') == 'Capsule'
-  assert jm.getValue('Application-Class') == 'com.foo.Main'
-  if (options.fat) {
-    assert jm.size() == 5
-  } else if (options.maven) {
-    assert jm.getValue('Dependencies') == 'com.github.penggle:commons:1.0.0(*:*) com.sefford:commons:1.0.0(*:*) junit:junit:4.11 org.apache.ant:ant:1.9.3(*:ant-launcher)'
-    assert jm.getValue('Caplets') == 'MavenCapsule'
-    assert jm.size() == 7
-  }
-
-  if(options.executableScript){
-    def expectedReallyExecutableHeader = getExecutableScriptContents(options.executableScript)
-    def expectedLines = expectedReallyExecutableHeader.split(System.lineSeparator()).length
-    def actualReallyExecutableHeader = file.readLines()[0..<expectedLines].join(System.lineSeparator())
-
-    if(expectedReallyExecutableHeader != actualReallyExecutableHeader){
-      assert expectedReallyExecutableHeader == actualReallyExecutableHeader
-    }
-  }
-}
-
-private String getExecutableScriptContents(String type){
-  def cap = project.configurations.capsuleUtil.files.first()
-
-  def filename;
-  if (type == 'trampoline') {
-    filename = 'capsule/trampoline-execheader.sh'
-  } else if (type == 'regular') {
-    filename = 'capsule/execheader.sh'
-  } else {
-      throw new IllegalArgumentException("Unknown executable script type '$type'");
-  }
-
-  def ze = ant.zipentry(zipfile: cap, name: filename)
-  return ze.inputStream.text.trim()
 }

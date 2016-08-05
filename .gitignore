@@ -8,3 +8,4 @@ out
 *.iws
 
 src/test/gradle/gradle/wrapper/gradle-wrapper.properties
+src/test/gradle/really-executable.sh
