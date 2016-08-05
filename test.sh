@@ -5,6 +5,8 @@
 #
 # You can expect the tests to run for 20 to 30 seconds _per_ version.
 
+set -eu
+
 VERSIONS=(
   2.14.1
   2.13
@@ -21,13 +23,14 @@ VERSIONS=(
 
 main(){
   echo "## Building plugin and running unit tests"
-  assemble_plugin || die "## Failed to build plugin"
+  assemble_plugin
 
   cd src/test/gradle
   for GRADLE_VERSION in ${VERSIONS[*]}; do
-    echo "## $GRADLE_VERSION :: Testing plugin"
+    echo
+    echo "###################### $GRADLE_VERSION ######################"
     write_wrapper_props_file "$GRADLE_VERSION"
-    integration_tests || die "## $GRADLE_VERSION :: Tests failed"
+    integration_tests
   done
 
   echo "## All tests passed"
@@ -38,18 +41,19 @@ assemble_plugin(){
 }
 
 integration_tests(){
-  ./gradlew clean self-test
+  cp really-executable.base.sh really-executable.sh
+  echo "## Building and verifying capsules"
+  ./gradlew clean buildAll runScript -PtestScript=TestCapsule.groovy
+
+  echo "## Modifying some files and rebuilding"
+  cp really-executable.modified.sh really-executable.sh
+  ./gradlew buildAll runScript -PtestScript=TestModifications.groovy
 }
 
 write_wrapper_props_file(){
   cat gradle/wrapper/gradle-wrapper.properties.base | \
     sed "s/gradle-[0-9.]*-bin.zip/gradle-$1-bin.zip/" \
     > gradle/wrapper/gradle-wrapper.properties
-}
-
-die(){
-  echo "$1"
-  exit 1
 }
 
 main
