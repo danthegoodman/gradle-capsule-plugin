@@ -2,10 +2,10 @@
 
 A Gradle plugin for [Capsule], the packaging and deployment tool for JVM apps.
 
-Currently using capsule [v1.0.1].
+Currently using capsule [v1.0.3].
 
 [Capsule]:http://www.capsule.io/
-[v1.0.1]:https://github.com/puniverse/capsule/releases/tag/v1.0.1
+[v1.0.3]:https://github.com/puniverse/capsule/releases/tag/v1.0.3
 
 # Adding the Plugin
 
