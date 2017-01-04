@@ -1,8 +1,6 @@
 package us.kirchmeier.capsule.manifest
-
 import org.gradle.testfixtures.ProjectBuilder
 import org.testng.annotations.Test
-import us.kirchmeier.capsule.manifest.CapsuleManifest;
 
 public class CapsuleManifestTest {
 
@@ -14,7 +12,7 @@ public class CapsuleManifestTest {
 
     assert [(null):['Main-Class': 'Capsule', 'Application': 'foo:bar', 'Premain-Class': 'Capsule']] == result
   }
-
+  
   @Test
   public void "build nested java manifest attributes with application"() {
     def m = new CapsuleManifest()
