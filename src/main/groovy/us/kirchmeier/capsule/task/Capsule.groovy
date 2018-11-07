@@ -2,7 +2,6 @@ package us.kirchmeier.capsule.task
 
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.FileCollectionDependency
-import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.util.ConfigureUtil
 import us.kirchmeier.capsule.manifest.CapsuleManifest
@@ -24,7 +23,7 @@ class Capsule extends Jar {
    * A filter, used to limit the capsule classes if the entire jar is not needed.
    * <p>The closure delegates to a {@link org.gradle.api.file.CopySpec}.</p>
    */
-  Closure capsuleFilter
+  Closure capsuleFilter = {}
 
   /**
    * The caplet configuration describing any caplet classes.
