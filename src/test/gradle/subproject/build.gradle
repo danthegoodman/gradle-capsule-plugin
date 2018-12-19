@@ -1,3 +1,5 @@
-task hello << {
-  println "Hello, I am a subproject"
+task hello {
+  doLast {
+    println "Hello, I am a subproject"
+  }
 }

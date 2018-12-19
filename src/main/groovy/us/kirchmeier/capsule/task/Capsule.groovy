@@ -24,7 +24,7 @@ class Capsule extends Jar {
    * A filter, used to limit the capsule classes if the entire jar is not needed.
    * <p>The closure delegates to a {@link org.gradle.api.file.CopySpec}.</p>
    */
-  Closure capsuleFilter
+  Closure capsuleFilter = {}
 
   /**
    * The caplet configuration describing any caplet classes.
