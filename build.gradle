@@ -1,5 +1,5 @@
 plugins {
-  id "com.gradle.plugin-publish" version "0.9.2"
+  id "com.gradle.plugin-publish" version "0.10.0"
 }
 
 apply plugin: 'groovy'
@@ -22,6 +22,7 @@ repositories {
 dependencies {
     compile gradleApi()
     compile localGroovy()
+    testCompile 'org.testng:testng:6.14.3'
 }
 
 task sourcesJar(type: Jar) {
