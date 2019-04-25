@@ -2,7 +2,6 @@ package us.kirchmeier.capsule.manifest
 
 import org.gradle.testfixtures.ProjectBuilder
 import org.testng.annotations.Test
-import us.kirchmeier.capsule.manifest.CapsuleManifest;
 
 public class CapsuleManifestTest {
 
@@ -225,7 +224,7 @@ public class CapsuleManifestTest {
         'com.foo:Calculator-Adware:1.3:annoying(com.foo.optional:*) ' +
         'com.foo:Calculator-Ajax:1.1:standalone ' +
         'com.foo:Calculator-Core:1.0 ' +
-        'com.foo:Calculator-Mongo:1.2(com.bar:common,*:shared)'
+        'com.foo:Calculator-Mongo:1.2(*:shared,com.bar:common)'
 
     assert expectedDeps == result[null]['Dependencies']
   }

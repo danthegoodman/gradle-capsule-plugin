@@ -91,9 +91,10 @@ project('subproject') {
   }
 }
 
-task runScript() << {
+task runScript() {
   if(!project.hasProperty('testScript')) throw new Exception("Missing -PtestScript=...")
-  evaluate(new File(project.property('testScript')))
+  println("RUN SCRIPT: ${project.property('testScript')}")
+//  evaluate(new File(project.property('testScript')))
 }
 
 def buildAllTask = task('buildAll')
