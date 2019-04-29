@@ -1,12 +1,3 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:latest.release"
-    }
-}
-
 plugins {
   id 'java-gradle-plugin'
   id 'groovy'
@@ -14,6 +5,7 @@ plugins {
   id 'signing'
   id 'idea'
   id 'maven-publish'
+  id 'com.jfrog.artifactory' version '4.9.6'
 }
 
 def project_description = """\
