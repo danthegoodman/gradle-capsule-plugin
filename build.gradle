@@ -21,8 +21,6 @@ repositories {
 }
 
 dependencies {
-    compile gradleApi()
-    compile localGroovy()
     testCompile group: 'org.testng', name: 'testng', version: '6.10'
 }
 
