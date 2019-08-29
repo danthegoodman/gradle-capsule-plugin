@@ -2,6 +2,14 @@
 
 A Gradle plugin for [Capsule], the packaging and deployment tool for JVM apps.
 
+> :warning: This project is no longer maintained.
+>
+> Consider using this gianluz's fork:
+>
+> * Github: https://github.com/gianluz/gradle-capsule-plugin
+> * Plugin: https://plugins.gradle.org/plugin/it.gianluz.capsule
+>
+
 Currently using capsule [v1.0.3].
 
 [Capsule]:http://www.capsule.io/
