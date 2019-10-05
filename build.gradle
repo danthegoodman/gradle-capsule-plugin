@@ -22,6 +22,8 @@ repositories {
 dependencies {
     compile gradleApi()
     compile localGroovy()
+
+	testCompile 'org.testng:testng:6.11'
 }
 
 task sourcesJar(type: Jar) {
@@ -55,4 +57,8 @@ pluginBundle {
 
 test {
     useTestNG()
+}
+
+task wrapper(type: Wrapper) {
+	gradleVersion = "3.5"
 }
