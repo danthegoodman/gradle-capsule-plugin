@@ -4,7 +4,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.util.ConfigureUtil
 
-class CapsuleManifest {
+class CapsuleManifest implements Serializable {
 
   @ManifestSetting('Premain-Class')
   public String premainClass

@@ -1,11 +1,14 @@
 plugins {
   id 'java-gradle-plugin'
   id 'groovy'
-  id 'maven'
   id 'signing'
   id 'idea'
   id 'maven-publish'
-  id 'com.jfrog.artifactory' version '4.9.6'
+  id 'com.jfrog.artifactory' version '4.31.5'
+}
+
+repositories {
+    mavenCentral()
 }
 
 def project_description = """\
@@ -16,12 +19,8 @@ A Gradle plugin utilizing Capsule, the packaging and deployment tool for JVM app
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-repositories {
-    jcenter()
-}
-
 dependencies {
-    testCompile group: 'org.testng', name: 'testng', version: '6.10'
+    testImplementation group: 'org.testng', name: 'testng', version: '6.10'
 }
 
 task sourcesJar(type: Jar) {
