@@ -2,7 +2,10 @@ package us.kirchmeier.capsule.task
 
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.FileCollectionDependency
-import org.gradle.api.artifacts.ModuleDependency
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputFiles
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.util.ConfigureUtil
 import us.kirchmeier.capsule.manifest.CapsuleManifest
@@ -18,12 +21,15 @@ class Capsule extends Jar {
    * If null, you are responsible for including the necessary capsule classes.
    * </p>
    */
+  @OutputFiles
   Configuration capsuleConfiguration
 
   /**
    * A filter, used to limit the capsule classes if the entire jar is not needed.
    * <p>The closure delegates to a {@link org.gradle.api.file.CopySpec}.</p>
    */
+  @Input
+  @Optional
   Closure capsuleFilter
 
   /**
@@ -35,23 +41,28 @@ class Capsule extends Jar {
    * If null, you are responsible for including the necessary caplet classes.
    * </p>
    */
+  @OutputFiles
   Configuration capletConfiguration
 
   /**
    * The main object to include, representative of the primary application.
    * <p>This object is passed directly to {@link #from(java.lang.Object...)}.</p>
    */
+  @Input
   Object applicationSource
 
   /**
    * The configuration describing the dependencies to embed in the capsule.
    * <p>If null, no dependencies are embedded.</p>
    */
+  @OutputFiles
   Configuration embedConfiguration
 
+  @Input
   CapsuleManifest capsuleManifest = new CapsuleManifest()
 
   protected ReallyExecutableSpec _reallyExecutable = null
+
   protected HashMap<String,Integer> _embeddedNameCounter = new HashMap<String,Integer>()
 
   Capsule() {
@@ -105,6 +116,7 @@ class Capsule extends Jar {
     return this
   }
 
+  @Internal
   public ReallyExecutableSpec getReallyExecutable(){
     if(_reallyExecutable == null){
       _reallyExecutable = new ReallyExecutableSpec(inputs);
@@ -147,7 +159,10 @@ class Capsule extends Jar {
   protected void applyDefaultCapsuleSet() {
     if (!capsuleConfiguration) return
 
-    from(capsuleConfiguration.collect({ project.zipTree(it) }), capsuleFilter)
+    if (!capsuleFilter)
+      from(capsuleConfiguration.collect({ project.zipTree(it) }))
+    else
+      from(capsuleConfiguration.collect({ project.zipTree(it) }), capsuleFilter)
   }
 
   protected void applyDefaultCapletSet() {

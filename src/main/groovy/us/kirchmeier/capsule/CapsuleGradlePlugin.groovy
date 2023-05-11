@@ -7,8 +7,8 @@ import us.kirchmeier.capsule.task.FatCapsule
 import us.kirchmeier.capsule.task.MavenCapsule
 
 class CapsuleGradlePlugin implements Plugin<Project> {
-  private static final REQUIRED_GRADLE_MAJOR_VERSION = 2
-  private static final REQUIRED_GRADLE_MINOR_VERSION = 4
+  private static final REQUIRED_GRADLE_MAJOR_VERSION = 5
+  private static final REQUIRED_GRADLE_MINOR_VERSION = 0
 
   @Override
   void apply(Project project) {

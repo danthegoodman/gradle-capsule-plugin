@@ -3,7 +3,7 @@ package us.kirchmeier.capsule.spec
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskInputs
 
-class ReallyExecutableSpec {
+class ReallyExecutableSpec implements Serializable {
 
   File script
   protected boolean _regular = true

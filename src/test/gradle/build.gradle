@@ -91,7 +91,7 @@ project('subproject') {
   }
 }
 
-task runScript() << {
+task runScript() {
   if(!project.hasProperty('testScript')) throw new Exception("Missing -PtestScript=...")
   evaluate(new File(project.property('testScript')))
 }
